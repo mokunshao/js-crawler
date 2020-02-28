@@ -1,6 +1,6 @@
-const request = require('request');
 const cheerio = require('cheerio');
 const fs = require('fs');
+const fetch = require('node-fetch');
 
 const Movie = function () {
   this.name = '';
@@ -10,8 +10,14 @@ const Movie = function () {
   this.coverUrl = '';
 };
 
-const main = function () {
+const getMovies = async function (url) {
+  const res = await fetch(url);
+  const html = await res.text();
+};
 
+const main = function () {
+  const url = 'https://movie.douban.com/top250';
+  getMovies(url);
 };
 
 main();
