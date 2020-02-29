@@ -26,6 +26,32 @@ const getMovie = function (element) {
   return movie;
 };
 
+const saveMovies = function (movies) {
+  const path = 'douban.txt';
+  const data = JSON.stringify(movies, null, 2);
+  fs.writeFile(path, data, function (error) {
+    if (error === null) {
+      console.log(path + ' 保存成功！');
+    } else {
+      console.log(error);
+    }
+  });
+};
+
+const downloadMoviesCover = function (movies) {
+  movies.forEach(function (movie) {
+    const path = movie.name.split('/')[0].trim() + '.jpg';
+    const coverUrl = movie.coverUrl;
+    fetch(coverUrl)
+      .then((res) => (res.buffer()))
+      .then(data => {
+        const writerStream = fs.createWriteStream(path);
+        writerStream.write(data, 'UTF8');
+        writerStream.end();
+      });
+  });
+};
+
 const getMovies = async function (url) {
   const res = await fetch(url);
   const html = await res.text();
@@ -36,7 +62,8 @@ const getMovies = async function (url) {
     const movie = getMovie(item);
     movies.push(movie);
   });
-  console.log(movies);
+  saveMovies(movies);
+  downloadMoviesCover(movies);
 };
 
 const main = function () {
