@@ -26,10 +26,11 @@ const getMovie = function (element) {
   return movie;
 };
 
-const saveMovies = function (movies) {
+const saveMovies = function (movies, dirname) {
   const path = 'douban.txt';
+  const path2 = !dirname ? path : `./${dirname}/${path}`;
   const data = JSON.stringify(movies, null, 2);
-  fs.writeFile(path, data, function (error) {
+  fs.writeFile(path2, data, function (error) {
     if (error === null) {
       console.log(path + ' 保存成功！');
     } else {
@@ -38,18 +39,25 @@ const saveMovies = function (movies) {
   });
 };
 
-const downloadMoviesCover = function (movies) {
+const downloadMoviesCover = function (movies, dirname) {
   movies.forEach(function (movie) {
     const path = movie.name.split('/')[0].trim() + '.jpg';
+    const path2 = !dirname ? path : `./${dirname}/${path}`;
     const coverUrl = movie.coverUrl;
     fetch(coverUrl)
-      .then((res) => (res.buffer()))
-      .then(data => {
-        const writerStream = fs.createWriteStream(path);
+      .then((res) => res.buffer())
+      .then((data) => {
+        const writerStream = fs.createWriteStream(path2);
         writerStream.write(data, 'UTF8');
         writerStream.end();
       });
   });
+};
+
+const createDirectory = function (dirname) {
+  if (!fs.existsSync(dirname)) {
+    fs.mkdirSync(dirname);
+  }
 };
 
 const getMovies = async function (url) {
@@ -62,8 +70,9 @@ const getMovies = async function (url) {
     const movie = getMovie(item);
     movies.push(movie);
   });
-  saveMovies(movies);
-  downloadMoviesCover(movies);
+  createDirectory('storage');
+  saveMovies(movies, 'storage');
+  downloadMoviesCover(movies, 'storage');
 };
 
 const main = function () {
